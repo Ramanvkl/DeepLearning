@@ -40,11 +40,11 @@ Value |	0.4943 |	0.4943 |	0.1 |	0.6616
 Decreasing or increasing the learning rate for the model with Sigmoid activation function significantly lowered its performance. It shows that the model is very sensitive to the learning rate. The following table represents the performance metrics for the model with Sigmoid activation function and different learning rates:
 
 Learning Rate | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
+
 0.005 |	0.5057 |	0 |	0 |	0
---- | --- | --- | --- | --- | 
+
 0.01 |	0.4943 |	0.4943 |	1 |	0.6616
---- | --- | --- | --- | --- | 
+
 0.02 |	0.5057 |	0 |	0 |	0
 
 For the Leaky ReLU activation function, decreasing or increasing the learning rate lowered the performance of the model. The change was more significant with increasing the learning rate. The following table represents the performance metrics for the model with Leaky ReLU activation function and different learning rates:
