@@ -64,57 +64,48 @@ Both the size and number of hidden layers were studied for both the Leaky ReLU a
 Decreasing the size of the hidden layer for the model with Leaky ReLU activation function significantly increased the model’s performance. Increasing the size of the hidden layer also improved the performance but the impact was less significant. It is worth mentioning that the learning rate was 0.005 in all the experiments. The following table represents the performance of the model with Leaky ReLU activation function and different sizes of the hidden layer:
 
 | Hidden Layer Size | Accuracy |	Precision |	Recall |	F1 |
---- | --- | --- | --- | --- | 
+| --- | --- | --- | --- | --- | 
 | 11 |	0.4943 |	0.4943 |	1 |	0.6616 |
 | 22 |	0.5049 |	0.4444 |	0.007 |	0.0138 |
 | 44 |	0.5072 |	0.5009 |	0.7683 |	0.6065 |
 
 For the model with Sigmoid activation function, decreasing or increasing the size of the hidden layer significantly lowered the performance. The performance decrease was more significant when lowering the size of the hidden layer. It is worth mentioning that the learning rate was 0.01 in all the experiments. The following table represents the performance of the model with Sigmoid activation function and different sizes of the hidden layer:
 
-Hidden Layer Size | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-11 |	0.5057 |	0 |	0 |	0
---- | --- | --- | --- | --- | 
-22 |	0.4943 |	0.4943 |	1 |	0.6616
---- | --- | --- | --- | --- | 
-44 |	0.5056 |	0.5047 |	0.0988 |	0.1652
+| Hidden Layer Size | Accuracy |	Precision |	Recall |	F1 |
+| --- | --- | --- | --- | --- | 
+| 11 |	0.5057 |	0 |	0 |	0 |
+| 22 |	0.4943 |	0.4943 |	1 |	0.6616 |
+| 44 |	0.5056 |	0.5047 |	0.0988 |	0.1652 |
 
 
 ### The Number of Hidden Layers
 
 Adding a hidden layer to the model with the Leaky ReLU activation function, slightly improved its performance. However, adding one more layer to the decreased the performance of the model significantly. It is worth mentioning that the size of all hidden layers were set to 44 and the learning rate was 0.005 in all the experiments. The following tables represents the performance of the model with Leaky ReLU activation function and different numbers of hidden layers:
 
-Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-1 |	0.5072 |	0.5009 |	0.7683 |	0.6065
---- | --- | --- | --- | --- | 
-2 |	0.4943 |	0.4943 |	0.9999 |	0.6615
---- | --- | --- | --- | --- | 
-3 |	0.5057 |	0 |	0 |	0
+| Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1 |
+| --- | --- | --- | --- | --- | 
+| 1 |	0.5072 |	0.5009 |	0.7683 |	0.6065 |
+| 2 |	0.4943 |	0.4943 |	0.9999 |	0.6615 |
+| 3 |	0.5057 |	0 |	0 |	0 |
 
 For the model with the Sigmoid activation function, adding a hidden layer significantly improved the model’s performance. However, adding one more hidden layer to the model did not change the performance at all, which shows this case is an example of diminishing returns. It is worth mentioning that the size of all hidden layers were set to 44 and the learning rate was 0.01 in all the experiments. The following tables represents the performance of the model with Sigmoid activation function and different numbers of hidden layers:
 
-Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-1 |	0.5056 |	0.5047 |	0.0988 |	0.1652
---- | --- | --- | --- | --- | 
-2 |	0.4943 |	0.4943 |	1 |	0.6616
---- | --- | --- | --- | --- | 
-3 |	0.4943 |	0.4943 |	1 |	0.6616
+| Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1 |
+| --- | --- | --- | --- | --- | 
+| 1 |	0.5056 |	0.5047 |	0.0988 |	0.1652 |
+| 2 |	0.4943 |	0.4943 |	1 |	0.6616 |
+| 3 |	0.4943 |	0.4943 |	1 |	0.6616 |
 
 
 # Best Performing Model
 
 The best-performing model could achieve accuracy, precision, recall, and f1 of 0.4943, 0.4943, 1, and 0.6616, respectively. It is worth mentioning that we could get similar performance metrics with different architectures and hyperparameter. Different model specifications that yielded the mentioned results are listed in the following table:
 
-Number | Activation Function |	Learning Rate |	Hidden Layer Size |	Number of Hidden Layers
---- | --- | --- | --- | --- | 
-1 |	Sigmoid |	0.01 |	22 |	1
---- | --- | --- | --- | --- | 
-2 |	Leaky ReLU |	0.005 |	11 |	1
---- | --- | --- | --- | --- | 
-3 |	Sigmoid |	0.01 |	44 |	2
---- | --- | --- | --- | --- | 
-4 |	Sigmoid |	0.01 |	44 |	3
+| Number | Activation Function |	Learning Rate |	Hidden Layer Size |	Number of Hidden Layers |
+| --- | --- | --- | --- | --- | 
+| 1 |	Sigmoid |	0.01 |	22 |	1 |
+| 2 |	Leaky ReLU |	0.005 |	11 |	1 |
+| 3 |	Sigmoid |	0.01 |	44 |	2 |
+| 4 |	Sigmoid |	0.01 |	44 |	3 |
 
 Since neural networks are computationally expensive, selecting the second or first models is recommended for practical use cases due to the similar performance metrics. Due to the lower size of the hidden layers in the second model, it is expected to be more computationally efficient, especially for larger datasets. 
