@@ -1,111 +1,119 @@
 # Overview 
 
-In this assignment, we tried to predict customer churn using feed-forward neural networks. The dataset used for this purpose consists of 100 features (including 21 categorical features and 79 numeric variables) for 100,000 records of customers of a telecommunications company obtained from Kaggle. After preprocessing the data, we split it into training and test sets with the respective size of 70 and 30 percent of the complete data. We used PyTorch to train the model, experimented with different network architectures, activation functions, and learning rates to identify their impact on the performance of the model, and selected the best-performing model. 
+In this project, we used PyTorch Lightning to build a feed-forward neural network model that predicts both house prices (a regression task) and house categories (a classification task). For this purpose, we used a dataset from Kaggle, including 81 attributes (sale price and 80 predictors) for 1460 houses. After preprocessing the data and based on the ‘HouseStyle’, ‘BldgType’, ‘YearBuilt’, and ‘YearRemodAdd’ features, we added a new feature, ‘HouseCategory’, which served as our target variable for the classification task. Having the data ready for model development, we split the data into train, test, and validation sets with the respective size of 70, 15, and 15 percent of the overall data. We tried different activation functions, optimizers, and loss functions to develop our feed-forward neural network model. Finding the optimal specifications for our model, we utilized PyTorch Lightning’s integration with Optuna for hyperparameter optimization. The final model possesses an average accuracy of 0.942, average precision of 0.947, average recall of 0.965, average F1 of 0.954, and RMSE of 38567 on the test set. It is worth mentioning that Pytorch Lightning’s features, such as callback and trainer, are used throughout the process.
 
 
 # Data Preprocessing
 
-Having the data preprocessed, we selected the ‘churn’ column as our target variable and all the remaining columns as predictors. Then, we split the data into training and test sets. The size of the training and test sets are 70 and 30 percent, respectively, and the random state is set to 0 for the sake of reproducibility of the splits. 
+Since the dataset is relatively small, we dropped the columns that their number of missing values exceeded 10 percent of the length of the data to avoid impacting the distributions of variables. Then, we replaced missing values with the median value of the respective column for numeric variables and mode value of the column for categorical variables. Having the missing values handled, we created a new target variable for our classification task to represent the house categories  based on the ‘HouseStyle’, ‘BldgType’, ‘YearBuilt’, and ‘Year RemodAdd’ Since the data is not large enough, we do not create a category for each combination of the mentioned variables. Instead, we define classes based on the following rules:
+
+1. If a house has a ‘BldgType’ of ‘1Fam’ or a ‘HouseStyle’ of ‘1Story’/’1.5Fin’/’1.5Unf’, it is considered a small house.
+
+2. If the ‘YearBuilt’ for a house is 2000 or newer, the house is considered a new house.
+
+3. If the ‘YearRemodAdd’ is larger than the ‘YearBuilt’ by more than 20, the house is considered remodeled.
+   
+Finally, the HouseCategory of 0 is assigned to houses that are small and new, 1 is assigned to small, old, remodeled houses, 2 is assigned to small, old, not remodeled houses, 3 is assigned to big and new houses, 4 is assigned to big, old, remodeled houses, and 5 is assigned to big, old, not remodeled houses. It is assumed that houses built after 2000 are not remodeled and are all considered new.
+
+We selected the ‘SalePrice’ and ‘HouseCategory’ features as our target variables and the remaining features, except for ‘Id’, as predictors. Due to the small size of our dataset, we utilized label encoding instead of one-hot encoding to avoid overcomplicating the model while encoding categorical variables. Also, we used the min-max scaler instead of the standard scalar to normalize the data because some variables do not follow the Gaussian distribution. Finally, we split the data into train, test, and validation sets with the respective size of 70, 15, and 15 percent of the overall data. It is worth mentioning that our preprocessed data consists of 73 predictors and 2 target variables, and the target variable for the classification task has 6 different classes due to our definition.
 
 
-# Training the Model
+# Multi-task Model Building
 
-We defined the FNN class inheriting from the torch.nn.Module. The base model defined to have a single hidden layer with the ReLU activation function. Since the input size is similar to the number of predictors at 89, we set the initial size of the hidden layer to 22, which is approximately one-fourth of the input size. This value is derived from our exercise in the class where a hidden size of one-sixth of the input size resulted in a solid performance. The number of epochs was also set to 20. Also, we used the Cross-Entropy loss function and the stochastic gradient descent algorithm for the optimizer. The following table represents the performance metrics of the base model:
-
-Metric | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-Value |	0.5057 |	0.5 |	0.0001 |	0.0003
+We used PyTorch Lightning for training our model. Since the model is a multi-task model, the architecture is shared in base layers while the top layers differ for the two tasks. The shared layer consists of two layers with respective sizes of 36 and 18, and the top layer for both tasks has a size of 10. The output layer size for the regression task is 1, and 6 for the classification task. Also, the input layer size is 73, according to the number of predictors. We experimented with different activation functions, optimizers, and loss functions. We also used PyTorch Lightning’s trainer to train all the models in this project. It is worth noting that we initialized the weights using Xavier Initialization and used the MSE loss function for the regression task and the Cross-Entropy Loss function for the classification task. Also, the overall loss function is the sum of the loss functions for individual tasks.
 
 
-# Experiments
-We experimented with different activation functions including ReLU, Leaky ReLU, and Sigmoid. Then, we changed the learning rate to see its impact on the model’s performance. We also changed the size of the hidden layer to see how it impacts the performance of the model. Moreover, we tried adding more hidden layers and studied their impact on the performance. It is worth mentioning that all the experiments have been done with both Leaky ReLU and Sigmoid activation functions. The results of the experiments would be presented in the following sections. It is worth noting that all the parameters and hyperparameters, except for the one mentioned in the related part, are kept consistent for the sake of comparison.  
+# Activation Functions
 
-## Activation Function
+We experimented with ReLU, LeakyReLU, and Sigmoid activation functions as well as their combinations. Among all the models, the model with the LeakyReLU activation function performed the best. The following table represents the performance metrics for all the models:
 
-Changing the activation function to the Leaky ReLU slightly improved the performance. It is worth mentioning that its impact on the model’s recall was more significant. The following table represents the performance metrics of the model with the Leaky ReLU activation function:
+| Activation Function               | RMSE   | Accuracy | Precision | Recall | F1     |
+|-----------------------------------|--------|----------|-----------|--------|--------|
+| ReLU                              | 118493 | 0.426    | 0.071     | 0.1667 | 0.0996 |
+| LeakyReLU                         | 91473  | 0.2411   | 0.0402    | 0.1667 | 0.0648 |
+| Sigmoid                           | 197467 | 0.426    | 0.071     | 0.1667 | 0.0996 |
+| LeakyReLU (Shared), Sigmoid (Top) | 197470 | 0.426    | 0.071     | 0.1667 | 0.0996 |
+| Sigmoid (Top), LeakyReLU (Shared) | 197385 | 0.426    | 0.071     | 0.1667 | 0.0996 |
 
-Metric | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-Value |	0.5140 |	0.5397 |	0.1142 |	0.1886
-
-Then, we changed the activation function to Sigmoid, which significantly improved the recall. However, it slightly decreased the accuracy and precision of the model. The following table represents the performance metrics of the model with the Sigmoid activation function:
-
-Metric | Accuracy |	Precision |	Recall |	F1
---- | --- | --- | --- | --- | 
-Value |	0.4943 |	0.4943 |	0.1 |	0.6616
+According to the results, the LeakyReLU activation function significantly improves the performance of the regression task. On the other hand, ReLU and Sigmoid activation functions perform better than LeakyReLU for the classification task. According to the order of magnitude of the target variables for both tasks, the regression error’s contribution to the loss function is expected to be much more significant than the classification error. Therefore, we prioritized better performance in the regression task over the classification task and chose LeakyReLU as the activation function of all the shared and top layers. It is worth mentioning that this setting remained unchanged for all the next steps for consistency.
 
 
-## Learning Rate
+## Optimizers
 
-Decreasing or increasing the learning rate for the model with Sigmoid activation function significantly lowered its performance. It shows that the model is very sensitive to the learning rate. The following table represents the performance metrics for the model with Sigmoid activation function and different learning rates:
+Having the activation functions chosen, we experimented with Adam and RMSProp loss functions to find the best-performing alternative for our use case. The learning rates for both the Adam and RMSProp optimizers were set to 0.001 for comparison. The following table represents the performance metrics for both models:
 
-| Learning Rate | Accuracy  | Precision  | Recall | F1     |
-|---------------|-----------|------------|--------|--------|
-| 0.005         | 0.5057    | 0          | 0      | 0      |
-| 0.01          | 0.4943    | 0.4943     | 1      | 0.6616 |
-| 0.02          | 0.5057    | 0          | 0      | 0      |
+| Optimizer                         | RMSE   | Accuracy | Precision | Recall | F1     |
+|-----------------------------------|--------|----------|-----------|--------|--------|
+| Adam                              | 91473  | 0.2411   | 0.0402    | 0.1667 | 0.0648 |
+| RMSProp                           | 151095 | 0.426    | 0.071     | 0.1667 | 0.0996 |
 
-
-For the Leaky ReLU activation function, decreasing or increasing the learning rate lowered the performance of the model. The change was more significant with increasing the learning rate. The following table represents the performance metrics for the model with Leaky ReLU activation function and different learning rates:
-
-| Learning Rate | Accuracy  | Precision  | Recall | F1     |
-|---------------|-----------|------------|--------|--------|
-| 0.005         | 0.5049    | 0.4444     | 0.007      | 0.0138      |
-| 0.01          | 0.5140    | 0.5397     | 0.1142     | 0.1886      |
-| 0.02          | 0.5057    | 0          | 0          | 0           |
+Similar to the previous part, the Adam optimizer performs worse for the classification tasks, whereas its performance in the regression task is significantly superior to RMSProp. Therefore, we chose Adam as our optimizer because the regression error’s contribution to the loss function is expected to be much more significant than the classification error. This setting also remained unchanged for all the next steps for consistency.
 
 
-## Hidden Layers
+# Loss Functions
 
-Both the size and number of hidden layers were studied for both the Leaky ReLU and Sigmoid activation functions. It is worth mentioning that, when adding a new hidden layers, the size of all hidden layers were kept similar. This isolated change enabled us to see the sole impact of the changing the number of hidden layers in the architecture on the model’s performance. 
+Having the activation functions and optimizer algorithm identified, we experimented with different loss functions to find the superior combination of functions for this use case. We started with changing the loss function for the regression task. We tried both the MSE and L1 loss functions for the regression task. The following table represents the performance metrics for both models:
 
-### The Size of Hidden Layers
+| Regression Loss Function          | RMSE   | Accuracy | Precision | Recall | F1     |
+|-----------------------------------|--------|----------|-----------|--------|--------|
+| MSE                               | 91473  | 0.2411   | 0.0402    | 0.1667 | 0.0648 |
+| L1                                | 78061  | 0.2411   | 0.0402    | 0.1667 | 0.0648 |
 
-Decreasing the size of the hidden layer for the model with Leaky ReLU activation function significantly increased the model’s performance. Increasing the size of the hidden layer also improved the performance but the impact was less significant. It is worth mentioning that the learning rate was 0.005 in all the experiments. The following table represents the performance of the model with Leaky ReLU activation function and different sizes of the hidden layer:
+According to the results, the model with the L1 loss function for the regression task performs better than the model with the MSE loss function in the regression task while the performance metrics of the models for the classification task are identical. Therefore, we chose the L1 loss function for the regression task. This setting remained unchanged for all the next steps for consistency. It is worth noting that we did not change the loss function for the classification task since we had a multi-class classification task. 
 
-| Hidden Layer Size | Accuracy |	Precision |	Recall |	F1 |
-| --- | --- | --- | --- | --- | 
-| 11 |	0.4943 |	0.4943 |	1 |	0.6616 |
-| 22 |	0.5049 |	0.4444 |	0.007 |	0.0138 |
-| 44 |	0.5072 |	0.5009 |	0.7683 |	0.6065 |
+After finding the optimal loss functions for individual tasks, we experimented with the overall loss function of the model to improve the model’s performance. To do so, we changed the aggregation method we used to define the overall loss function based on individual loss functions of each task. We experimented with arithmetic mean and geometric mean of the two loss functions. Since the model with the loss function of the geometric mean of individual loss functions performed better than the other model, we continued working on this model. Having in mind the order of magnitude of the target variable of the regression task is significantly larger than the classification task, we expected the contribution of the regression error to be much more significant as well. Therefore, we also tried to prioritize minimizing the regression error by multiplying its individual loss function by three. It is worth noting that we have changed the definition of the individual loss function here, not the aggregation method. The following table represents the performance metrics for all the models:
 
-For the model with Sigmoid activation function, decreasing or increasing the size of the hidden layer significantly lowered the performance. The performance decrease was more significant when lowering the size of the hidden layer. It is worth mentioning that the learning rate was 0.01 in all the experiments. The following table represents the performance of the model with Sigmoid activation function and different sizes of the hidden layer:
+| Aggregation method                       | RMSE   | Accuracy | Precision | Recall | F1     |
+|------------------------------------------|--------|----------|-----------|--------|--------|
+| Arithmetic mean                          | 78061  | 0.2411   | 0.0402    | 0.1667 | 0.0648 |
+| Geometric mean                           | 197358 | 0.849    | 0.7212    | 0.6784 | 0.6954 |
+| Geometric mean  (regression prioritized) | 197326 | 0.859    | 0.9       | 0.659  | 0.705  |
 
-| Hidden Layer Size | Accuracy |	Precision |	Recall |	F1 |
-| --- | --- | --- | --- | --- | 
-| 11 |	0.5057 |	0 |	0 |	0 |
-| 22 |	0.4943 |	0.4943 |	1 |	0.6616 |
-| 44 |	0.5056 |	0.5047 |	0.0988 |	0.1652 |
-
-
-### The Number of Hidden Layers
-
-Adding a hidden layer to the model with the Leaky ReLU activation function, slightly improved its performance. However, adding one more layer to the decreased the performance of the model significantly. It is worth mentioning that the size of all hidden layers were set to 44 and the learning rate was 0.005 in all the experiments. The following tables represents the performance of the model with Leaky ReLU activation function and different numbers of hidden layers:
-
-| Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1 |
-| --- | --- | --- | --- | --- | 
-| 1 |	0.5072 |	0.5009 |	0.7683 |	0.6065 |
-| 2 |	0.4943 |	0.4943 |	0.9999 |	0.6615 |
-| 3 |	0.5057 |	0 |	0 |	0 |
-
-For the model with the Sigmoid activation function, adding a hidden layer significantly improved the model’s performance. However, adding one more hidden layer to the model did not change the performance at all, which shows this case is an example of diminishing returns. It is worth mentioning that the size of all hidden layers were set to 44 and the learning rate was 0.01 in all the experiments. The following tables represents the performance of the model with Sigmoid activation function and different numbers of hidden layers:
-
-| Number of Hidden Layers | Accuracy |	Precision |	Recall |	F1 |
-| --- | --- | --- | --- | --- | 
-| 1 |	0.5056 |	0.5047 |	0.0988 |	0.1652 |
-| 2 |	0.4943 |	0.4943 |	1 |	0.6616 |
-| 3 |	0.4943 |	0.4943 |	1 |	0.6616 |
+According to the results, changing the aggregation method significantly improves the model’s performance in the classification task but lowers its performance in the regression task. Since the improvement in the classification task’s performance (almost 3.5X performance) is more significant than the decrease in the regression task’s performance (almost 2.5X), we prioritized the model’s performance in the classification task this time. Therefore, we changed the aggregation method to geometric mean while prioritizing the individual loss function of the regression task. This setting remained unchanged for all the next steps for consistency.
 
 
-# Best Performing Model
+# Model Evaluation 
 
-The best-performing model could achieve accuracy, precision, recall, and f1 of 0.4943, 0.4943, 1, and 0.6616, respectively. It is worth mentioning that we could get similar performance metrics with different architectures and hyperparameter. Different model specifications that yielded the mentioned results are listed in the following table:
+We evaluated the model throughout the process to find the optimal choices for activation, optimizer, and loss functions. The performance metrics are mentioned in the tables above. It is worth mentioning that all the mentioned performance metrics are measured on the validation set. Since we aimed to optimize the hyperparameters of the model, we initially trained our different models on the training set and evaluated them on the validation set. The test set will not be used until the end of the process to avoid information leakage. According to the results, our best-performing model possesses an RMSE of 197326, average accuracy of 0.859, average precision of 0.9, average recall of 0.659, and average F1 of 0.705. Average classification scores are derived by calculating the arithmetic mean of classification scores for different categories. It is also with noting that this model uses the LeakyReLU activation function, Adam optimizer, L1 loss for the regression task, Cross-Entropy loss for the classification task, and the geometric mean of the individual loss functions prioritizing the loss function of the regression task for the overall loss. The following table represents this model’s performance metrics:
 
-| Number | Activation Function |	Learning Rate |	Hidden Layer Size |	Number of Hidden Layers |
-| --- | --- | --- | --- | --- | 
-| 1 |	Sigmoid |	0.01 |	22 |	1 |
-| 2 |	Leaky ReLU |	0.005 |	11 |	1 |
-| 3 |	Sigmoid |	0.01 |	44 |	2 |
-| 4 |	Sigmoid |	0.01 |	44 |	3 |
+| RMSE   | Accuracy | Precision | Recall | F1     |
+|--------|----------|-----------|--------|--------|
+| 197326 | 0.859    | 0.9       | 0.659  | 0.705  |
 
-Since neural networks are computationally expensive, selecting the second or first models is recommended for practical use cases due to the similar performance metrics. Due to the lower size of the hidden layers in the second model, it is expected to be more computationally efficient, especially for larger datasets. 
+
+# Advanced PyTorch Lightning Features
+
+As mentioned earlier, we used PyTorch Lightning’s trainer to train all the models. It enabled us to focus on designing and implementing the model’s and made the training process much easier by providing a high-level interface that simplifies the training process. It also standardized training loop that follows best practices for training deep learning models handling essential training components, such as batching, optimization, gradient accumulation, and distributed training. 
+
+We also used its callback during the hyperparameter optimization step. It simplified the implementation of early stopping by allowing us to extend the behavior of the training process without modifying the core training code. Its integration with Optuna also simplified the hyperparameter optimization process.
+
+
+# Hyperparameter Tuning
+
+Having our model selected, we leveraged PyTorch Lightning’s integration with Optuna to find the optimal hyperparameters for our model. According to our model’s specifications, we tried to find the optimal learning rate for the optimization algorithm used in the model. To do so, we defined a study in Optuna to find the optimal learning rate and used PyTorch Lightning’s trainer and callback system to simplify the process. 
+
+The following table represents the model’s performance metrics before and after hyperparameter optimization:
+
+| Model                                    | RMSE   | Accuracy | Precision | Recall | F1     |
+|------------------------------------------|--------|----------|-----------|--------|--------|
+| Before Hyperparameter Optimization       | 197326 | 0.859    | 0.9       | 0.659  | 0.705  |
+| After Hyperparameter Optimization        | 38567  | 0.942    | 0.947     | 0.965  | 0.954  |
+
+The optimal learning rate for the Adam optimizer was found to be 0.0374. Compared to the non-optimized model, the performance of the optimized model has been significantly improved. Also, the recall and F1 scores for the optimized model are considerably higher than the non-optimized model. In addition, the accuracy and precision of the model are also improved after the hyperparameter optimization. 
+
+It is worth noting that the performance metrics mentioned above for the classification task are the arithmetic means of performance metrics for individual categories. The following table represents the model’s performance metrics in the classification task for individual classes:
+
+| HouseCategory | Precision | Recall | F1    |
+|---------------|-----------|--------|-------|
+| 0             | 0.954     | 0.949  | 0.952 |
+| 1             | 0.884     | 1      | 0.938 |
+| 2             | 0.97      | 0.905  | 0.936 |
+| 3             | 0.875     | 1      | 0.933 |
+| 4             | 1         | 1      | 1     |
+| 5             | 1         | 0.936  | 0.967 |
+
+
+# Conclusion
+
+In this project, we implemented multi-task learning models with PyTorch and PyTorch Lightning, experimented with different activation functions, optimizers, and loss functions in a multi-task learning context, used advanced features of PyTorch Lightning, such as the trainer and callback system, used PyTorch Lightning's integration with Optuna to tune hyperparameters, and handled real-world data and predicted outcomes for multiple tasks using a shared model architecture. Our final model uses the LeakyReLU activation function, Adam optimizer, L1 loss for the regression task, Cross-Entropy loss for the classification task, and the geometric mean of the individual loss functions prioritizing the loss function of the regression task for the overall loss. The optimal learning rate for this model was found to be 0.0374. This model possesses an RMSE of 38567, average accuracy of 0.942, average precision of 0.947, average recall of 0.965, and average F1 of 0.954, measured on the test set.
+
