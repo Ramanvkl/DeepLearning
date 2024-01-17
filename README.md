@@ -63,13 +63,11 @@ Both the size and number of hidden layers were studied for both the Leaky ReLU a
 
 Decreasing the size of the hidden layer for the model with Leaky ReLU activation function significantly increased the model’s performance. Increasing the size of the hidden layer also improved the performance but the impact was less significant. It is worth mentioning that the learning rate was 0.005 in all the experiments. The following table represents the performance of the model with Leaky ReLU activation function and different sizes of the hidden layer:
 
-Hidden Layer Size | Accuracy |	Precision |	Recall |	F1
+| Hidden Layer Size | Accuracy |	Precision |	Recall |	F1 |
 --- | --- | --- | --- | --- | 
-11 |	0.4943 |	0.4943 |	1 |	0.6616
---- | --- | --- | --- | --- | 
-22 |	0.5049 |	0.4444 |	0.007 |	0.0138
---- | --- | --- | --- | --- | 
-44 |	0.5072 |	0.5009 |	0.7683 |	0.6065
+| 11 |	0.4943 |	0.4943 |	1 |	0.6616 |
+| 22 |	0.5049 |	0.4444 |	0.007 |	0.0138 |
+| 44 |	0.5072 |	0.5009 |	0.7683 |	0.6065 |
 
 For the model with Sigmoid activation function, decreasing or increasing the size of the hidden layer significantly lowered the performance. The performance decrease was more significant when lowering the size of the hidden layer. It is worth mentioning that the learning rate was 0.01 in all the experiments. The following table represents the performance of the model with Sigmoid activation function and different sizes of the hidden layer:
 
